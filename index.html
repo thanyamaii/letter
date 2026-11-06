@@ -1,200 +1,383 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>จดหมายถึงคนพิเศษ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@300;400;600&family=Pridi:wght@400;600&display=swap">
 <style>
-/* Layout: one centered stage. A sealed envelope opens, then the letter unfolds in normal flow with a second hidden message. */
+/* Layout: pastel pink page with corner flowers and falling petals. A tappable envelope sits on top; opening it unfolds the letter below, types the message in, and ends with a reply button. */
 :root {
-  --night: #14343a;
-  --night-2: #0e2a2f;
-  --paper: #fbfaf6;
-  --ink: #1f2f3a;
-  --ink-soft: #52646e;
-  --env: #c9d3e6;
-  --env-front: #b4c0d9;
-  --seal: #c8453f;
-  --glow: #f3c969;
+  --bg: #ffe6ee;
+  --bg-2: #ffd3e1;
+  --paper: #fffafb;
+  --ink: #5a2a43;
+  --ink-soft: #8d5a74;
+  --rose: #ec6a96;
+  --rose-deep: #c9437a;
+  --env: #f8bdd0;
+  --env-front: #f3a4bf;
+  --gold: #f3c969;
+  --line: rgba(236, 106, 150, .16);
   --font-display: "Pridi", "Noto Serif Thai", Georgia, serif;
   --font-body: "Mali", "Noto Sans Thai", "Sarabun", system-ui, sans-serif;
-  color-scheme: dark;
+  color-scheme: light;
 }
 * { box-sizing: border-box; }
 html, body { min-height: 100%; }
 body {
   margin: 0;
-  background: radial-gradient(120% 90% at 50% 0%, var(--night) 0%, var(--night-2) 100%) var(--night-2);
-  color: var(--paper);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%) var(--bg-2);
+  background-attachment: fixed;
+  color: var(--ink);
   font-family: var(--font-body);
-  padding-block: 32px;
+  padding-block: 24px 48px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: hidden;
 }
-main { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 28px; min-height: 80vh; justify-content: center; }
+main {
+  position: relative; z-index: 2; max-width: 520px; margin: 0 auto;
+  padding-top: clamp(64px, 12vh, 120px);
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
 
-.hint { margin: 0; font-size: 1rem; color: var(--glow); letter-spacing: .02em; text-align: center; transition: opacity .4s; }
-.hint small { display: block; margin-top: 4px; color: #9fb3b8; font-size: .8rem; }
+/* Decoration */
+.decor, .petals, .hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.decor { z-index: 0; }
+.petals { z-index: 1; }
+.hearts { z-index: 60; }
+.flower { position: absolute; animation: spin 80s linear infinite; }
+.flower.f1 { width: 190px; top: -64px; left: -64px; color: #f6a3c0; }
+.flower.f2 { width: 150px; top: -40px; right: -46px; color: #ffffff; opacity: .85; animation-direction: reverse; }
+.flower.f3 { width: 170px; bottom: -56px; left: -42px; color: #ffffff; opacity: .85; animation-duration: 100s; }
+.flower.f4 { width: 210px; bottom: -72px; right: -66px; color: #f6a3c0; animation-direction: reverse; }
+.flower.f5 { width: 64px; top: 38%; right: -18px; color: #f9c3d6; animation-duration: 50s; }
+.flower.f6 { width: 56px; top: 56%; left: -16px; color: #f9c3d6; animation-duration: 60s; animation-direction: reverse; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.petal {
+  position: absolute; top: 0; border-radius: 80% 0 80% 0; opacity: .75;
+  background: linear-gradient(135deg, #ffb6cf, #ff8fb4); animation: fall linear infinite;
+}
+@keyframes fall {
+  0% { transform: translate3d(0, -12vh, 0) rotate(0deg); }
+  50% { transform: translate3d(var(--dx, 40px), 50vh, 0) rotate(180deg); }
+  100% { transform: translate3d(0, 112vh, 0) rotate(360deg); }
+}
+.heart { position: fixed; line-height: 1; color: var(--rose); will-change: transform, opacity; }
+
+/* Music button */
+.music {
+  position: fixed; z-index: 70;
+  top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px));
+  display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer;
+  font: inherit; font-size: .9rem; font-weight: 600; color: var(--rose-deep);
+  background: rgba(255, 250, 251, .92); padding: 9px 16px; border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(201, 67, 122, .22);
+}
+.music[aria-pressed="true"] { background: var(--rose); color: #fff; }
+.music[aria-pressed="true"] .ic { animation: bob 1s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-3px) rotate(-12deg); } }
+.music:focus-visible, .env:focus-visible, .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
 
 /* Envelope */
-.stage { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 28px; transition: opacity .5s, transform .5s; }
-.stage.gone { opacity: 0; transform: translateY(16px) scale(.96); }
 .env {
-  position: relative; width: min(88vw, 340px); aspect-ratio: 4 / 3; max-width: 100%;
+  position: relative; width: min(86vw, 330px); aspect-ratio: 4 / 3; max-width: 100%;
   border: 0; padding: 0; background: none; cursor: pointer; font: inherit; color: inherit;
-  perspective: 900px; filter: drop-shadow(0 18px 28px rgba(0,0,0,.35));
+  perspective: 900px; filter: drop-shadow(0 14px 22px rgba(201, 67, 122, .28));
+  -webkit-tap-highlight-color: transparent;
 }
-.env:focus-visible { outline: 3px solid var(--glow); outline-offset: 8px; border-radius: 6px; }
 .env > * { position: absolute; inset: 0; }
-.back { background: var(--env); border-radius: 6px; }
+.back { background: var(--env); border-radius: 8px; }
 .note {
-  inset: 8% 7% 6% 7%; background: var(--paper); border-radius: 4px; z-index: 2;
-  padding: 14px 14px 0; transition: transform .8s cubic-bezier(.3,.7,.2,1) .55s;
+  inset: 8% 7% 6% 7%; background: var(--paper); border-radius: 5px; z-index: 2;
+  padding: 14px 14px 0; transition: transform .8s cubic-bezier(.3, .7, .2, 1) .5s;
   display: flex; flex-direction: column; gap: 8px;
 }
-.note i { display: block; height: 5px; border-radius: 3px; background: #d9dfe6; }
-.note i:nth-child(1) { width: 40%; background: var(--seal); opacity: .7; }
+.env:not(.open) .note { transition-delay: 0s; }
+.note i { display: block; height: 5px; border-radius: 3px; background: #f6d8e3; }
+.note i:nth-child(1) { width: 40%; background: var(--rose); opacity: .7; }
 .note i:nth-child(3) { width: 85%; }
 .note i:nth-child(4) { width: 60%; }
-.pocket { background: var(--env-front); border-radius: 6px; clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%); z-index: 3; }
+.pocket { background: var(--env-front); border-radius: 8px; clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%); z-index: 3; }
 .flap {
   background: var(--env); clip-path: polygon(0 0, 100% 0, 50% 60%); z-index: 4;
   transform-origin: 50% 0; transition: transform .6s ease-in-out, z-index 0s .3s;
 }
 .seal {
   inset: auto; left: 50%; top: 46%; width: 46px; height: 46px; margin: -4px 0 0 -23px; z-index: 5; border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #e0645d, var(--seal) 60%, #962d29);
-  box-shadow: 0 2px 6px rgba(0,0,0,.35); display: grid; place-items: center; transition: opacity .3s, transform .3s;
-  font-family: var(--font-display); font-size: 1.3rem; color: #f8d9d6;
+  background: radial-gradient(circle at 35% 30%, #f48fb4, var(--rose-deep) 65%, #a02f5c);
+  box-shadow: 0 2px 6px rgba(90, 42, 67, .35); display: grid; place-items: center;
+  transition: opacity .3s, transform .3s; font-size: 1.3rem; color: #ffe0ec;
 }
 .env.open .flap { transform: rotateX(180deg); z-index: 1; }
-.env.open .note { transform: translateY(-46%); }
+.env.open .note { transform: translateY(-32%); }
 .env.open .seal { opacity: 0; transform: scale(.6); }
-.env.open { cursor: default; }
-.stage.opened .hint { opacity: 0; }
+.hint { margin: 0; text-align: center; font-size: 1rem; font-weight: 600; color: var(--rose-deep); }
+.hint small { display: block; margin-top: 2px; font-weight: 400; font-size: .82rem; color: var(--ink-soft); }
 
 /* Letter */
+.letter-wrap {
+  display: grid; grid-template-rows: 0fr; width: 100%; visibility: hidden;
+  transition: grid-template-rows .9s cubic-bezier(.3, .7, .2, 1), visibility 0s .9s;
+}
+.letter-wrap.open {
+  grid-template-rows: 1fr; visibility: visible;
+  transition: grid-template-rows .9s cubic-bezier(.3, .7, .2, 1) .5s, visibility 0s 0s;
+}
+.letter-inner { min-height: 0; overflow: hidden; }
 .letter {
-  width: 100%; background: var(--paper); color: var(--ink); border-radius: 6px;
-  padding: 32px clamp(20px, 6vw, 36px) 36px; box-shadow: 0 24px 40px rgba(0,0,0,.35);
-  animation: rise .8s cubic-bezier(.2,.8,.2,1) both;
-  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 35px, rgba(31,47,58,.07) 35px, rgba(31,47,58,.07) 36px);
+  position: relative; margin: 6px 12px 30px; padding: 32px clamp(20px, 6vw, 34px) 34px;
+  background: var(--paper) repeating-linear-gradient(to bottom, transparent 0, transparent 35px, var(--line) 35px, var(--line) 36px);
+  border-radius: 8px; box-shadow: 0 14px 30px rgba(201, 67, 122, .25);
 }
-@keyframes rise { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
-.letter h1 { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; margin: 0 0 20px; text-wrap: balance; line-height: 1.4; }
-.letter p { margin: 0 0 16px; font-size: 1.05rem; line-height: 36px; font-weight: 400; }
-.sign { text-align: right; margin-top: 24px; color: var(--ink-soft); }
-.sign strong { display: block; font-family: var(--font-display); font-weight: 600; color: var(--ink); font-size: 1.15rem; }
+.letter .corner { position: absolute; top: -18px; right: -14px; width: 56px; color: #f6a3c0; transform: rotate(14deg); }
+.letter h1 { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; margin: 0 0 18px; line-height: 1.4; min-height: 1.4em; }
+.grp { margin: 0 0 14px; font-size: 1.05rem; line-height: 36px; }
+.grp span { display: block; min-height: 36px; }
+.grp.soft { color: var(--ink-soft); }
+.closing { margin-top: 20px; min-height: 1.6em; font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; line-height: 1.6; color: var(--rose-deep); }
+.typing::after {
+  content: ""; display: inline-block; width: 2px; height: 1.1em; margin-left: 2px; vertical-align: -.15em;
+  background: var(--rose); animation: blink .8s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
 
-.reveal {
-  display: block; margin: 28px auto 0; border: 0; cursor: pointer; font: inherit; font-weight: 600;
-  background: var(--seal); color: #fff; padding: 12px 22px; border-radius: 999px; font-size: 1rem;
-  box-shadow: 0 6px 14px rgba(200,69,63,.35); transition: transform .15s;
+.cta {
+  display: block; margin: 26px auto 0; border: 0; cursor: pointer; font: inherit; font-weight: 600; font-size: 1.05rem;
+  color: #fff; background: linear-gradient(135deg, #f48fb4, var(--rose-deep)); padding: 13px 26px; border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(201, 67, 122, .4); animation: pop .6s cubic-bezier(.3, 1.6, .5, 1) both, pulse 2s ease-in-out 1s infinite;
 }
-.reveal:hover { transform: translateY(-2px); }
-.reveal:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-.surprise {
-  margin-top: 28px; padding: 24px 20px; border-radius: 6px; text-align: center;
-  background: linear-gradient(160deg, #fff4d6, #fde6a8); border: 1px solid #ecc96a; animation: rise .7s both;
+.cta[hidden], .reply[hidden] { display: none; }
+@keyframes pop { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+@keyframes pulse { 50% { transform: scale(1.05); } }
+.reply {
+  margin-top: 26px; padding: 22px 18px; border-radius: 10px; text-align: center;
+  background: linear-gradient(160deg, #fff3f7, #ffe0ec); border: 1px solid #f7b4cb; animation: pop .7s both;
 }
-.surprise h2 { font-family: var(--font-display); font-size: 1.25rem; margin: 0 0 10px; color: #6b4a07; }
-.surprise p { margin: 0; line-height: 1.8; color: #4a3708; font-size: 1.05rem; }
+.reply h2 { margin: 0 0 8px; font-family: var(--font-display); font-size: 1.25rem; color: var(--rose-deep); }
+.reply p { margin: 0; min-height: 0; line-height: 1.8; font-size: 1.05rem; }
 
-#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
 @media (prefers-reduced-motion: reduce) {
-  .note, .flap, .stage, .seal, .letter, .surprise { transition-duration: .01s !important; transition-delay: 0s !important; animation-duration: .01s !important; }
+  .flower, .petal, .cta, .music .ic { animation: none !important; }
+  .petals, .hearts { display: none; }
+  .note, .flap, .seal, .letter-wrap, .letter-wrap.open { transition-duration: .01s !important; transition-delay: 0s !important; }
 }
 </style>
 
-<main>
-  <div class="stage" id="stage">
-    <p class="hint">มีจดหมายมาถึงคุณ<small>แตะซองเพื่อเปิดอ่าน</small></p>
-    <button class="env" id="env" type="button" aria-label="เปิดจดหมาย">
-      <div class="back"></div>
-      <div class="note"><i></i><i></i><i></i><i></i></div>
-      <div class="pocket"></div>
-      <div class="flap"></div>
-      <div class="seal" aria-hidden="true">♥</div>
-    </button>
-  </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="flower" viewBox="0 0 100 100">
+    <g fill="currentColor">
+      <ellipse cx="50" cy="26" rx="15" ry="24"/>
+      <ellipse cx="50" cy="26" rx="15" ry="24" transform="rotate(72 50 50)"/>
+      <ellipse cx="50" cy="26" rx="15" ry="24" transform="rotate(144 50 50)"/>
+      <ellipse cx="50" cy="26" rx="15" ry="24" transform="rotate(216 50 50)"/>
+      <ellipse cx="50" cy="26" rx="15" ry="24" transform="rotate(288 50 50)"/>
+    </g>
+    <circle cx="50" cy="50" r="10" fill="#f3c969"/>
+  </symbol>
+</svg>
 
-  <article class="letter" id="letter" hidden>
-    <h1>มีใครอยู่มั้ยยย</h1>
-    <p>เธอคิดถึงเค้าอ่ะป่าวว💞💞</p>
-    <p>ถ้าคิดถึงก็ทักมาบอกกันบ้างน้าาา เค้ารออยู่นะ</p>
-    
-    <div class="sign">คิดถึงนะ<strong>จากเค้าเอง</strong></div>
-    <button class="reveal" id="reveal" type="button">ยังมีอีกข้อความหนึ่ง กดเพื่อเปิด</button>
-    <div class="surprise" id="surprise" hidden>
-      <h2>เซอร์ไพรส์!</h2>
-      <p>เค้าคิดถึงเธอเหมือนกันนะ<br>ทักมาหาเค้าหน่อยน้าาา 💞</p>
+<div class="decor" aria-hidden="true">
+  <svg class="flower f1" viewBox="0 0 100 100"><use href="#flower" width="100" height="100"/></svg>
+  <svg class="flower f2" viewBox="0 0 100 100"><use href="#flower" width="100" height="100"/></svg>
+  <svg class="flower f3" viewBox="0 0 100 100"><use href="#flower" width="100" height="100"/></svg>
+  <svg class="flower f4" viewBox="0 0 100 100"><use href="#flower" width="100" height="100"/></svg>
+  <svg class="flower f5" viewBox="0 0 100 100"><use href="#flower" width="100" height="100"/></svg>
+  <svg class="flower f6" viewBox="0 0 100 100"><use href="#flower" width="100" height="100"/></svg>
+</div>
+<div class="petals" id="petals" aria-hidden="true"></div>
+<div class="hearts" id="hearts" aria-hidden="true"></div>
+
+<button class="music" id="music" type="button" aria-pressed="false"><span class="ic" aria-hidden="true">♪</span><span id="musicLabel">เปิดเพลง</span></button>
+
+<main>
+  <button class="env" id="env" type="button" aria-expanded="false" aria-label="เปิดซองจดหมาย">
+    <div class="back"></div>
+    <div class="note"><i></i><i></i><i></i><i></i></div>
+    <div class="pocket"></div>
+    <div class="flap"></div>
+    <div class="seal" aria-hidden="true">♥</div>
+  </button>
+  <p class="hint"><span id="hintMain">💌 มีจดหมายถึงคุณ</span><small id="hintSub">แตะซองเพื่อเปิดอ่าน</small></p>
+
+  <div class="letter-wrap" id="wrap">
+    <div class="letter-inner">
+      <article class="letter">
+        <svg class="corner" viewBox="0 0 100 100" aria-hidden="true"><use href="#flower" width="100" height="100"/></svg>
+        <h1 data-type>มีใครอยู่มั้ยยย 🥺</h1>
+        <div class="grp"><span data-type>แวะมาหาหน่อยย</span><span data-type>คิดถึงเค้าบ้างรึป่าววว 🥰💞</span></div>
+        <div class="grp"><span data-type>รู้มั้ยว่ามีคนแอบคิดถึงอยู่นะ</span><span data-type>ไม่รู้ว่าเธอจะรู้ตัวบ้างรึยังง</span></div>
+        <div class="grp"><span data-type>ถ้าว่างก็แวะมาคุยกันหน่อยน้าา</span><span data-type>เค้ามีเรื่องอยากคุยด้วยตั้งเยอะแน่ะ 🤏🏻💗</span></div>
+        <div class="grp soft"><span data-type>สุดท้ายนี้…</span></div>
+        <div class="closing" data-type>คิดถึงนะ รู้ตัวไว้ด้วยยย 🫶🏻💕</div>
+        <button class="cta" id="cta" type="button" hidden>คิดถึงเหมือนกัน 🥰</button>
+        <div class="reply" id="reply" hidden>
+          <h2>เซอร์ไพรส์!</h2>
+          <p>เค้าคิดถึงเธอเหมือนกันนะ<br>ทักมาหาเค้าหน่อยน้าาา 💞</p>
+        </div>
+      </article>
     </div>
-  </article>
+  </div>
 </main>
-<canvas id="confetti" aria-hidden="true"></canvas>
 
 <script>
 (function () {
-  var env = document.getElementById('env');
-  var stage = document.getElementById('stage');
-  var letter = document.getElementById('letter');
-  var reveal = document.getElementById('reveal');
-  var surprise = document.getElementById('surprise');
-  var cv = document.getElementById('confetti');
-  var ctx = cv.getContext('2d');
+  var $ = function (id) { return document.getElementById(id); };
+  var env = $('env'), wrap = $('wrap'), hearts = $('hearts'), cta = $('cta'), reply = $('reply');
+  var hintMain = $('hintMain'), hintSub = $('hintSub');
+  var musicBtn = $('music'), musicLabel = $('musicLabel');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var opened = false;
+  var isOpen = false, started = false;
+  var items = [].slice.call(document.querySelectorAll('[data-type]'));
+  var seg = (window.Intl && Intl.Segmenter) ? new Intl.Segmenter('th', { granularity: 'grapheme' }) : null;
 
-  function burst() {
-    if (reduce) return;
-    var w = cv.width = window.innerWidth, h = cv.height = window.innerHeight;
-    var colors = ['#f3c969', '#c8453f', '#c9d3e6', '#fbfaf6', '#7fc8b8'];
-    var ps = [];
-    for (var i = 0; i < 130; i++) {
-      ps.push({
-        x: w / 2 + (Math.random() - .5) * 80, y: h * 0.55,
-        vx: (Math.random() - .5) * 11, vy: -Math.random() * 13 - 4,
-        s: Math.random() * 6 + 4, r: Math.random() * 6, vr: (Math.random() - .5) * .4,
-        c: colors[(Math.random() * colors.length) | 0]
-      });
+  function chars(s) {
+    return seg ? Array.from(seg.segment(s), function (x) { return x.segment; }) : Array.from(s);
+  }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  items.forEach(function (el) { el.dataset.full = el.textContent.trim(); });
+  if (reduce) { cta.hidden = false; started = true; } else { items.forEach(function (el) { el.textContent = ''; }); }
+
+  /* Falling petals */
+  if (!reduce) {
+    var layer = $('petals');
+    for (var i = 0; i < 16; i++) {
+      var p = document.createElement('span');
+      var s = 9 + Math.random() * 10;
+      p.className = 'petal';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.width = s + 'px';
+      p.style.height = (s * 1.2) + 'px';
+      p.style.setProperty('--dx', ((Math.random() - .5) * 160) + 'px');
+      p.style.animationDuration = (10 + Math.random() * 10) + 's';
+      p.style.animationDelay = (-Math.random() * 20) + 's';
+      layer.appendChild(p);
     }
-    var t0 = performance.now();
-    (function frame(now) {
-      var age = now - t0;
-      ctx.clearRect(0, 0, w, h);
-      ps.forEach(function (p) {
-        p.vy += .28; p.vx *= .995; p.x += p.vx; p.y += p.vy; p.r += p.vr;
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
-        ctx.globalAlpha = Math.max(0, 1 - age / 3200);
-        ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
-        ctx.restore();
-      });
-      if (age < 3200) requestAnimationFrame(frame); else ctx.clearRect(0, 0, w, h);
-    })(t0);
   }
 
-  function openEnvelope() {
-    if (opened) return;
-    opened = true;
-    env.classList.add('open');
-    stage.classList.add('opened');
-    env.disabled = true;
-    setTimeout(function () {
-      stage.classList.add('gone');
-      setTimeout(function () {
-        stage.hidden = true;
-        letter.hidden = false;
-        window.scrollTo(0, 0);
-      }, reduce ? 20 : 500);
-    }, reduce ? 50 : 1700);
+  /* Floating hearts */
+  function floatHearts(origin, n, power) {
+    if (reduce) return;
+    var r = origin.getBoundingClientRect();
+    var ox = r.left + r.width / 2, oy = r.top + r.height * 0.35;
+    var glyphs = ['💗', '💖', '💕', '💓', '♥'];
+    for (var i = 0; i < n; i++) {
+      var h = document.createElement('span');
+      h.className = 'heart';
+      h.textContent = glyphs[(Math.random() * glyphs.length) | 0];
+      h.style.fontSize = (14 + Math.random() * 20) + 'px';
+      h.style.left = ox + 'px';
+      h.style.top = oy + 'px';
+      hearts.appendChild(h);
+      var dx = (Math.random() - .5) * r.width * 1.4 * power;
+      var rise = 180 + Math.random() * 260 * power;
+      var rot = (Math.random() - .5) * 50;
+      var a = h.animate([
+        { transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 },
+        { opacity: 1, offset: .15 },
+        { transform: 'translate(calc(-50% + ' + dx + 'px),calc(-50% - ' + rise + 'px)) scale(1.1) rotate(' + rot + 'deg)', opacity: 0 }
+      ], { duration: 2200 + Math.random() * 2200, delay: Math.random() * 600, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'backwards' });
+      a.onfinish = (function (el) { return function () { el.remove(); }; })(h);
+    }
   }
 
-  env.addEventListener('click', openEnvelope);
-  reveal.addEventListener('click', function () {
-    reveal.hidden = true;
-    surprise.hidden = false;
-    surprise.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
-    burst();
+  /* Typing effect */
+  async function typeAll() {
+    for (var k = 0; k < items.length; k++) {
+      var el = items[k], list = chars(el.dataset.full);
+      el.classList.add('typing');
+      for (var j = 0; j < list.length; j++) {
+        el.textContent = list.slice(0, j + 1).join('');
+        await sleep(45);
+      }
+      el.classList.remove('typing');
+      await sleep(240);
+    }
+    cta.hidden = false;
+  }
+
+  /* Envelope open / close */
+  env.addEventListener('click', function () {
+    isOpen = !isOpen;
+    env.classList.toggle('open', isOpen);
+    wrap.classList.toggle('open', isOpen);
+    env.setAttribute('aria-expanded', String(isOpen));
+    env.setAttribute('aria-label', isOpen ? 'ปิดซองจดหมาย' : 'เปิดซองจดหมาย');
+    hintMain.textContent = isOpen ? 'เปิดซองแล้ว' : '💌 มีจดหมายถึงคุณ';
+    hintSub.textContent = isOpen ? 'แตะซองอีกครั้งเพื่อปิด' : 'แตะซองเพื่อเปิดอ่าน';
+    if (isOpen) {
+      floatHearts(env, 18, 1);
+      if (!started) { started = true; setTimeout(typeAll, 1100); }
+    }
+  });
+
+  cta.addEventListener('click', function () {
+    floatHearts(cta, 40, 1.6);
+    cta.hidden = true;
+    reply.hidden = false;
+    reply.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+  });
+
+  /* Background music: a soft music-box loop made with the Web Audio API */
+  var ac = null, master = null, loopTimer = null, playing = false;
+  var step = 0.4, pat = [0, 1, 2, 1, 2, 1, 2, 1];
+  var bars = [
+    { c: [60, 64, 67], m: [[0, 76], [3, 79], [6, 76]] },
+    { c: [57, 60, 64], m: [[0, 72], [2, 76], [4, 79], [6, 76]] },
+    { c: [57, 60, 65], m: [[0, 77], [3, 76], [5, 72]] },
+    { c: [59, 62, 67], m: [[0, 74], [3, 71], [6, 67]] },
+    { c: [60, 64, 67], m: [[0, 79], [2, 76], [4, 79], [6, 81]] },
+    { c: [59, 62, 67], m: [[0, 79], [3, 74], [6, 71]] },
+    { c: [57, 60, 64], m: [[0, 76], [2, 72], [4, 76], [6, 72]] },
+    { c: [57, 60, 65], m: [[0, 72], [3, 77], [6, 76]] }
+  ];
+  var loopLen = bars.length * 8 * step;
+  function midi(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  function tone(t, f, dur, vol) {
+    var o = ac.createOscillator(), o2 = ac.createOscillator();
+    var g = ac.createGain(), g2 = ac.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    o2.type = 'triangle'; o2.frequency.value = f * 2; g2.gain.value = .25;
+    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(master);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + .01);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.start(t); o2.start(t); o.stop(t + dur + .05); o2.stop(t + dur + .05);
+  }
+  function schedule(start) {
+    bars.forEach(function (b, bi) {
+      var t0 = start + bi * 8 * step;
+      for (var s = 0; s < 8; s++) tone(t0 + s * step, midi(b.c[pat[s]]), 1.3, .35);
+      b.m.forEach(function (n) { tone(t0 + n[0] * step, midi(n[1]), 1.8, .5); });
+    });
+    var delay = Math.max(0, (start + loopLen - ac.currentTime - 1) * 1000);
+    loopTimer = setTimeout(function () { if (playing) schedule(start + loopLen); }, delay);
+  }
+  function startMusic() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ac = new AC();
+    if (ac.state === 'suspended') ac.resume();
+    master = ac.createGain();
+    master.gain.value = .18;
+    master.connect(ac.destination);
+    playing = true;
+    schedule(ac.currentTime + .1);
+    return true;
+  }
+  function stopMusic() {
+    playing = false;
+    clearTimeout(loopTimer);
+    var old = ac, m = master;
+    ac = null; master = null;
+    if (old) {
+      try { m.gain.setTargetAtTime(0, old.currentTime, .05); } catch (e) {}
+      setTimeout(function () { try { old.close(); } catch (e) {} }, 300);
+    }
+  }
+  musicBtn.addEventListener('click', function () {
+    var on = !playing;
+    try { if (on) { on = startMusic(); } else { stopMusic(); } } catch (e) { on = false; }
+    musicBtn.setAttribute('aria-pressed', String(on));
+    musicLabel.textContent = on ? 'ปิดเพลง' : 'เปิดเพลง';
   });
 })();
 </script>
-
-</body></html>
