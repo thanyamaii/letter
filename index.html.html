@@ -1,0 +1,200 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>จดหมายถึงคนพิเศษ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@300;400;600&family=Pridi:wght@400;600&display=swap">
+<style>
+/* Layout: one centered stage. A sealed envelope opens, then the letter unfolds in normal flow with a second hidden message. */
+:root {
+  --night: #14343a;
+  --night-2: #0e2a2f;
+  --paper: #fbfaf6;
+  --ink: #1f2f3a;
+  --ink-soft: #52646e;
+  --env: #c9d3e6;
+  --env-front: #b4c0d9;
+  --seal: #c8453f;
+  --glow: #f3c969;
+  --font-display: "Pridi", "Noto Serif Thai", Georgia, serif;
+  --font-body: "Mali", "Noto Sans Thai", "Sarabun", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(120% 90% at 50% 0%, var(--night) 0%, var(--night-2) 100%) var(--night-2);
+  color: var(--paper);
+  font-family: var(--font-body);
+  padding-block: 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 28px; min-height: 80vh; justify-content: center; }
+
+.hint { margin: 0; font-size: 1rem; color: var(--glow); letter-spacing: .02em; text-align: center; transition: opacity .4s; }
+.hint small { display: block; margin-top: 4px; color: #9fb3b8; font-size: .8rem; }
+
+/* Envelope */
+.stage { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 28px; transition: opacity .5s, transform .5s; }
+.stage.gone { opacity: 0; transform: translateY(16px) scale(.96); }
+.env {
+  position: relative; width: min(88vw, 340px); aspect-ratio: 4 / 3; max-width: 100%;
+  border: 0; padding: 0; background: none; cursor: pointer; font: inherit; color: inherit;
+  perspective: 900px; filter: drop-shadow(0 18px 28px rgba(0,0,0,.35));
+}
+.env:focus-visible { outline: 3px solid var(--glow); outline-offset: 8px; border-radius: 6px; }
+.env > * { position: absolute; inset: 0; }
+.back { background: var(--env); border-radius: 6px; }
+.note {
+  inset: 8% 7% 6% 7%; background: var(--paper); border-radius: 4px; z-index: 2;
+  padding: 14px 14px 0; transition: transform .8s cubic-bezier(.3,.7,.2,1) .55s;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.note i { display: block; height: 5px; border-radius: 3px; background: #d9dfe6; }
+.note i:nth-child(1) { width: 40%; background: var(--seal); opacity: .7; }
+.note i:nth-child(3) { width: 85%; }
+.note i:nth-child(4) { width: 60%; }
+.pocket { background: var(--env-front); border-radius: 6px; clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%); z-index: 3; }
+.flap {
+  background: var(--env); clip-path: polygon(0 0, 100% 0, 50% 60%); z-index: 4;
+  transform-origin: 50% 0; transition: transform .6s ease-in-out, z-index 0s .3s;
+}
+.seal {
+  inset: auto; left: 50%; top: 46%; width: 46px; height: 46px; margin: -4px 0 0 -23px; z-index: 5; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e0645d, var(--seal) 60%, #962d29);
+  box-shadow: 0 2px 6px rgba(0,0,0,.35); display: grid; place-items: center; transition: opacity .3s, transform .3s;
+  font-family: var(--font-display); font-size: 1.3rem; color: #f8d9d6;
+}
+.env.open .flap { transform: rotateX(180deg); z-index: 1; }
+.env.open .note { transform: translateY(-46%); }
+.env.open .seal { opacity: 0; transform: scale(.6); }
+.env.open { cursor: default; }
+.stage.opened .hint { opacity: 0; }
+
+/* Letter */
+.letter {
+  width: 100%; background: var(--paper); color: var(--ink); border-radius: 6px;
+  padding: 32px clamp(20px, 6vw, 36px) 36px; box-shadow: 0 24px 40px rgba(0,0,0,.35);
+  animation: rise .8s cubic-bezier(.2,.8,.2,1) both;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 35px, rgba(31,47,58,.07) 35px, rgba(31,47,58,.07) 36px);
+}
+@keyframes rise { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+.letter h1 { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; margin: 0 0 20px; text-wrap: balance; line-height: 1.4; }
+.letter p { margin: 0 0 16px; font-size: 1.05rem; line-height: 36px; font-weight: 400; }
+.sign { text-align: right; margin-top: 24px; color: var(--ink-soft); }
+.sign strong { display: block; font-family: var(--font-display); font-weight: 600; color: var(--ink); font-size: 1.15rem; }
+
+.reveal {
+  display: block; margin: 28px auto 0; border: 0; cursor: pointer; font: inherit; font-weight: 600;
+  background: var(--seal); color: #fff; padding: 12px 22px; border-radius: 999px; font-size: 1rem;
+  box-shadow: 0 6px 14px rgba(200,69,63,.35); transition: transform .15s;
+}
+.reveal:hover { transform: translateY(-2px); }
+.reveal:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.surprise {
+  margin-top: 28px; padding: 24px 20px; border-radius: 6px; text-align: center;
+  background: linear-gradient(160deg, #fff4d6, #fde6a8); border: 1px solid #ecc96a; animation: rise .7s both;
+}
+.surprise h2 { font-family: var(--font-display); font-size: 1.25rem; margin: 0 0 10px; color: #6b4a07; }
+.surprise p { margin: 0; line-height: 1.8; color: #4a3708; font-size: 1.05rem; }
+
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+@media (prefers-reduced-motion: reduce) {
+  .note, .flap, .stage, .seal, .letter, .surprise { transition-duration: .01s !important; transition-delay: 0s !important; animation-duration: .01s !important; }
+}
+</style>
+
+<main>
+  <div class="stage" id="stage">
+    <p class="hint">มีจดหมายมาถึงคุณ<small>แตะซองเพื่อเปิดอ่าน</small></p>
+    <button class="env" id="env" type="button" aria-label="เปิดจดหมาย">
+      <div class="back"></div>
+      <div class="note"><i></i><i></i><i></i><i></i></div>
+      <div class="pocket"></div>
+      <div class="flap"></div>
+      <div class="seal" aria-hidden="true">♥</div>
+    </button>
+  </div>
+
+  <article class="letter" id="letter" hidden>
+    <h1>มีใครอยู่มั้ยยย</h1>
+    <p>เธอคิดถึงเค้าอ่ะป่าวว💞💞</p>
+    <p>ถ้าคิดถึงก็ทักมาบอกกันบ้างน้าาา เค้ารออยู่นะ</p>
+    
+    <div class="sign">คิดถึงนะ<strong>จากเค้าเอง</strong></div>
+    <button class="reveal" id="reveal" type="button">ยังมีอีกข้อความหนึ่ง กดเพื่อเปิด</button>
+    <div class="surprise" id="surprise" hidden>
+      <h2>เซอร์ไพรส์!</h2>
+      <p>เค้าคิดถึงเธอเหมือนกันนะ<br>ทักมาหาเค้าหน่อยน้าาา 💞</p>
+    </div>
+  </article>
+</main>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(function () {
+  var env = document.getElementById('env');
+  var stage = document.getElementById('stage');
+  var letter = document.getElementById('letter');
+  var reveal = document.getElementById('reveal');
+  var surprise = document.getElementById('surprise');
+  var cv = document.getElementById('confetti');
+  var ctx = cv.getContext('2d');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var opened = false;
+
+  function burst() {
+    if (reduce) return;
+    var w = cv.width = window.innerWidth, h = cv.height = window.innerHeight;
+    var colors = ['#f3c969', '#c8453f', '#c9d3e6', '#fbfaf6', '#7fc8b8'];
+    var ps = [];
+    for (var i = 0; i < 130; i++) {
+      ps.push({
+        x: w / 2 + (Math.random() - .5) * 80, y: h * 0.55,
+        vx: (Math.random() - .5) * 11, vy: -Math.random() * 13 - 4,
+        s: Math.random() * 6 + 4, r: Math.random() * 6, vr: (Math.random() - .5) * .4,
+        c: colors[(Math.random() * colors.length) | 0]
+      });
+    }
+    var t0 = performance.now();
+    (function frame(now) {
+      var age = now - t0;
+      ctx.clearRect(0, 0, w, h);
+      ps.forEach(function (p) {
+        p.vy += .28; p.vx *= .995; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+        ctx.globalAlpha = Math.max(0, 1 - age / 3200);
+        ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+        ctx.restore();
+      });
+      if (age < 3200) requestAnimationFrame(frame); else ctx.clearRect(0, 0, w, h);
+    })(t0);
+  }
+
+  function openEnvelope() {
+    if (opened) return;
+    opened = true;
+    env.classList.add('open');
+    stage.classList.add('opened');
+    env.disabled = true;
+    setTimeout(function () {
+      stage.classList.add('gone');
+      setTimeout(function () {
+        stage.hidden = true;
+        letter.hidden = false;
+        window.scrollTo(0, 0);
+      }, reduce ? 20 : 500);
+    }, reduce ? 50 : 1700);
+  }
+
+  env.addEventListener('click', openEnvelope);
+  reveal.addEventListener('click', function () {
+    reveal.hidden = true;
+    surprise.hidden = false;
+    surprise.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+    burst();
+  });
+})();
+</script>
+
+</body></html>
